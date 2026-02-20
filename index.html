@@ -272,6 +272,10 @@
         box-shadow var(--transition-slow),
         border-color var(--transition-slow);
       animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+      max-height: 90vh;       /* Prevents it from exceeding viewport */
+      overflow: hidden;       /* Keeps outer card clean */
+      display: flex;
+      flex-direction: column;
     }
 
     @keyframes cardEntrance {
@@ -802,6 +806,8 @@
         border-right: none;
         max-width: 100%;
         box-shadow: none;
+        overflow-y: auto;
+        padding-right: 6px;
       }
 
       .name-row { grid-template-columns: 1fr; }
