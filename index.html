@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in or create your account to join the conversation." />
+  <title>Relay -- Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    /* =========================================================
+       DESIGN TOKENS & THEME VARIABLES
+       ========================================================= */
+    :root {
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-pill: 999px;
+
+      --transition-fast: 180ms ease;
+      --transition-base: 300ms ease;
+      --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+      --input-height: 52px;
+      --btn-height: 52px;
+    }
+
+    [data-theme="dark"] {
+      --bg-canvas:        #080c14;
+      --bg-surface:       #0e1420;
+      --bg-elevated:      #141c2e;
+      --bg-input:         #111827;
+      --bg-input-focus:   #141f35;
+
+      --border-subtle:    rgba(255,255,255,0.07);
+      --border-default:   rgba(255,255,255,0.12);
+      --border-strong:    rgba(255,255,255,0.22);
+
+      --text-primary:     #f0f4ff;
+      --text-secondary:   #8b99b5;
+      --text-muted:       #556177;
+      --text-inverse:     #080c14;
+
+      --accent-primary:   #4f8bff;
+      --accent-glow:      rgba(79,139,255,0.25);
+      --accent-gradient:  linear-gradient(135deg, #4f8bff 0%, #a36bff 100%);
+
+      --particle-color:   rgba(79,139,255,0.35);
+      --mesh-a:           rgba(79,139,255,0.08);
+      --mesh-b:           rgba(163,107,255,0.06);
+      --mesh-c:           rgba(20,180,160,0.05);
+
+      --shadow-card:      0 24px 64px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.05) inset;
+      --shadow-btn:       0 8px 24px rgba(79,139,255,0.35);
+
+      --oauth-google:     #ffffff;
+      --oauth-github:     #f0f4ff;
+      --oauth-apple:      #f0f4ff;
+      --oauth-bg:         rgba(255,255,255,0.04);
+      --oauth-border:     rgba(255,255,255,0.1);
+      --oauth-hover:      rgba(255,255,255,0.08);
+
+      --toggle-track:     #1a2540;
+      --toggle-icon:      #8b99b5;
+    }
+
+    [data-theme="light"] {
+      --bg-canvas:        #f0f2f8;
+      --bg-surface:       #ffffff;
+      --bg-elevated:      #f7f8fc;
+      --bg-input:         #f3f5fb;
+      --bg-input-focus:   #eef0fa;
+
+      --border-subtle:    rgba(0,0,0,0.05);
+      --border-default:   rgba(0,0,0,0.1);
+      --border-strong:    rgba(0,0,0,0.18);
+
+      --text-primary:     #0d1526;
+      --text-secondary:   #5a6a88;
+      --text-muted:       #9aa5be;
+      --text-inverse:     #ffffff;
+
+      --accent-primary:   #2b6dff;
+      --accent-glow:      rgba(43,109,255,0.38);
+      --accent-gradient:  linear-gradient(135deg, #2b6dff 0%, #8b4fff 100%);
+
+      --particle-color:   rgba(43,109,255,0.35);
+      --mesh-a:           rgba(43,109,255,0.06);
+      --mesh-b:           rgba(139,79,255,0.04);
+      --mesh-c:           rgba(20,180,160,0.04);
+
+      --shadow-card:      0 24px 64px rgba(0,30,80,0.12), 0 1px 0 rgba(255,255,255,0.8) inset;
+      --shadow-btn:       0 8px 24px rgba(43,109,255,0.28);
+
+      --oauth-google:     #1f2937;
+      --oauth-github:     #1f2937;
+      --oauth-apple:      #1f2937;
+      --oauth-bg:         rgba(0,0,0,0.03);
+      --oauth-border:     rgba(0,0,0,0.1);
+      --oauth-hover:      rgba(0,0,0,0.06);
+
+      --toggle-track:     #dde3f0;
+      --toggle-icon:      #5a6a88;
+    }
+
+    /* =========================================================
+       RESET & BASE
+       ========================================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-slow), color var(--transition-slow);
+    }
+
+    /* =========================================================
+       CANVAS BACKGROUND
+       ========================================================= */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .mesh-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      will-change: transform;
+      transition: background var(--transition-slow);
+    }
+
+    .mesh-orb--a {
+      width: 600px; height: 600px;
+      top: -10%; left: -10%;
+      background: var(--mesh-a);
+    }
+    .mesh-orb--b {
+      width: 500px; height: 500px;
+      bottom: -5%; right: -10%;
+      background: var(--mesh-b);
+    }
+    .mesh-orb--c {
+      width: 350px; height: 350px;
+      top: 40%; left: 60%;
+      background: var(--mesh-c);
+    }
+
+    /* =========================================================
+       CURSOR FOLLOWER
+       ========================================================= */
+    #cursor-glow {
+      position: fixed;
+      width: 480px;
+      height: 480px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      transform: translate(-50%, -50%);
+      transition: opacity var(--transition-base);
+      will-change: transform;
+      background: radial-gradient(circle, var(--accent-glow) 0%, var(--accent-glow) 15%, transparent 70%);
+    }
+
+    /* =========================================================
+       PAGE LAYOUT
+       ========================================================= */
+    .page-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    /* =========================================================
+       THEME TOGGLE
+       ========================================================= */
+    .theme-toggle {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 100;
+    }
+
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      color: var(--toggle-icon);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      transition:
+        background var(--transition-base),
+        border-color var(--transition-base),
+        color var(--transition-base),
+        box-shadow var(--transition-fast);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    .theme-btn:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .theme-btn:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 3px;
+    }
+
+    .theme-btn svg {
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+      transition: transform var(--transition-base), opacity var(--transition-base);
+    }
+
+    .icon-sun, .icon-moon {
+      position: absolute;
+      transition: opacity var(--transition-base), transform var(--transition-base);
+    }
+
+    .theme-btn-icons {
+      position: relative;
+      width: 16px; height: 16px;
+    }
+
+    [data-theme="dark"] .icon-sun  { opacity: 1; transform: rotate(0deg) scale(1); }
+    [data-theme="dark"] .icon-moon { opacity: 0; transform: rotate(90deg) scale(0.6); }
+    [data-theme="light"] .icon-sun  { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+    [data-theme="light"] .icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
+
+    /* =========================================================
+       AUTH CARD
+       ========================================================= */
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 40px 36px;
+      transition:
+        background var(--transition-slow),
+        box-shadow var(--transition-slow),
+        border-color var(--transition-slow);
+      animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes cardEntrance {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* =========================================================
+       BRAND
+       ========================================================= */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .brand-mark {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-mark svg {
+      width: 20px; height: 20px;
+      fill: #fff;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* =========================================================
+       MODE SWITCHER TABS
+       ========================================================= */
+    .mode-tabs {
+      display: flex;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 28px;
+      position: relative;
+    }
+
+    .mode-tab {
+      flex: 1;
+      padding: 10px 0;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: calc(var(--radius-md) - 4px);
+      transition: color var(--transition-base);
+      position: relative;
+      z-index: 1;
+    }
+
+    .mode-tab.active { color: var(--text-primary); }
+
+    .mode-tab:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+
+    .tab-slider {
+      position: absolute;
+      top: 4px; bottom: 4px;
+      width: calc(50% - 4px);
+      left: 4px;
+      background: var(--bg-surface);
+      border-radius: calc(var(--radius-md) - 4px);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      transition: transform var(--transition-slow);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-slider.signup { transform: translateX(100%); }
+
+    /* =========================================================
+       FORM PANELS
+       ========================================================= */
+    .form-panels {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-panel {
+      transition: opacity var(--transition-base), transform var(--transition-base);
+    }
+
+    .form-panel.hidden {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(20px);
+    }
+
+    .form-panel.entering-left {
+      transform: translateX(-20px);
+    }
+
+    /* =========================================================
+       FORM ELEMENTS
+       ========================================================= */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .form-label .required-mark {
+      color: var(--accent-primary);
+      margin-left: 2px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      height: var(--input-height);
+      padding: 0 44px 0 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 400;
+      transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .form-input:focus {
+      background: var(--bg-input-focus);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-input[aria-invalid="true"] {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px; height: 18px;
+      color: var(--text-muted);
+      pointer-events: none;
+      transition: color var(--transition-fast);
+    }
+
+    .form-input:focus ~ .input-icon { color: var(--accent-primary); }
+
+    .toggle-password {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      border-radius: var(--radius-sm);
+      transition: color var(--transition-fast);
+    }
+
+    .toggle-password:hover { color: var(--text-secondary); }
+    .toggle-password:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+
+    .toggle-password svg { width: 18px; height: 18px; }
+
+    /* Password strength */
+    .password-strength {
+      margin-top: 8px;
+      display: none;
+    }
+
+    .strength-bar {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border-subtle);
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 2px;
+      transition: width 0.4s ease, background 0.4s ease;
+    }
+
+    .strength-label {
+      font-size: 11px;
+      margin-top: 4px;
+      color: var(--text-muted);
+      transition: color var(--transition-fast);
+    }
+
+    /* Error messages */
+    .field-error {
+      font-size: 12px;
+      color: #ef4444;
+      margin-top: 6px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .field-error.visible { display: flex; }
+
+    .field-error svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    /* Name row */
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* =========================================================
+       TERMS CHECKBOX
+       ========================================================= */
+    .terms-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .terms-check {
+      width: 18px; height: 18px;
+      flex-shrink: 0;
+      accent-color: var(--accent-primary);
+      margin-top: 2px;
+      cursor: pointer;
+    }
+
+    .terms-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .terms-label a {
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+
+    .terms-label a:hover { text-decoration: underline; }
+
+    /* =========================================================
+       FORGOT PASSWORD
+       ========================================================= */
+    .forgot-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 6px;
+      margin-bottom: 4px;
+    }
+
+    .forgot-link {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    .forgot-link:hover { color: var(--accent-primary); }
+
+    .forgot-link:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+      border-radius: 3px;
+    }
+
+    /* =========================================================
+       PRIMARY BUTTON
+       ========================================================= */
+    .btn-primary {
+      width: 100%;
+      height: var(--btn-height);
+      background: var(--accent-gradient);
+      border: none;
+      border-radius: var(--radius-md);
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      margin-top: 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast);
+      box-shadow: var(--shadow-btn);
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.12);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .btn-primary:hover::before { opacity: 1; }
+    .btn-primary:hover { box-shadow: 0 12px 32px rgba(79,139,255,0.45); }
+    .btn-primary:active { transform: scale(0.985); }
+
+    .btn-primary:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 3px;
+    }
+
+    .btn-primary[aria-busy="true"] {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .btn-primary[aria-busy="true"] .btn-text { opacity: 0; }
+    .btn-primary[aria-busy="true"] .btn-spinner { display: block; }
+
+    .btn-text { transition: opacity var(--transition-fast); }
+
+    .btn-spinner {
+      display: none;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* =========================================================
+       DIVIDER
+       ========================================================= */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .divider-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* =========================================================
+       OAUTH BUTTONS
+       -- FRONTEND PLACEHOLDER ONLY --
+       No backend or real OAuth flows implemented here.
+       Replace onClick handlers with your OAuth SDK calls.
+       ========================================================= */
+    .oauth-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .oauth-btn {
+      width: 100%;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--oauth-bg);
+      border: 1px solid var(--oauth-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast);
+      position: relative;
+    }
+
+    .oauth-btn:hover {
+      background: var(--oauth-hover);
+      border-color: var(--border-strong);
+    }
+
+    .oauth-btn:active { transform: scale(0.99); }
+
+    .oauth-btn:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+
+    .oauth-badge {
+      position: absolute;
+      top: -1px;
+      right: 10px;
+      font-size: 9px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 1px 5px;
+      border-radius: var(--radius-pill);
+    }
+
+    .oauth-btn svg { flex-shrink: 0; }
+
+    /* OAuth icon colors */
+    .oauth-google-icon .g-blue { fill: #4285f4; }
+    .oauth-google-icon .g-red  { fill: #ea4335; }
+    .oauth-google-icon .g-yellow { fill: #fbbc04; }
+    .oauth-google-icon .g-green  { fill: #34a853; }
+
+    /* =========================================================
+       FORM SECTION HEADING
+       ========================================================= */
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    .signup-heading {
+      font-family: Georgia, 'Times New Roman', serif;
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .signup-sub {
+      text-align: center;
+    }
+
+    .section-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    /* =========================================================
+       LIVE REGION FOR FORM ERRORS
+       ========================================================= */
+    .form-announce {
+      font-size: 13px;
+      color: #ef4444;
+      margin-top: -8px;
+      margin-bottom: 12px;
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 28px 20px;
+        border-radius: var(--radius-md);
+        border-left: none;
+        border-right: none;
+        max-width: 100%;
+        box-shadow: none;
+      }
+
+      .name-row { grid-template-columns: 1fr; }
+
+      .theme-toggle { top: 16px; right: 16px; }
+
+      .theme-btn span { display: none; }
+    }
+
+    /* =========================================================
+       UTILITIES
+       ========================================================= */
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cursor-reactive glow layer -->
+  <div id="cursor-glow" aria-hidden="true"></div>
+
+  <!-- Ambient mesh background -->
+  <div class="mesh-orb mesh-orb--a" aria-hidden="true"></div>
+  <div class="mesh-orb mesh-orb--b" aria-hidden="true"></div>
+  <div class="mesh-orb mesh-orb--c" aria-hidden="true"></div>
+
+  <!-- Canvas for particle field -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- Skip navigation -->
+  <a class="sr-only" href="#main-form" style="position:fixed;top:4px;left:4px;z-index:9999;padding:8px 16px;background:var(--bg-surface);color:var(--text-primary);border-radius:6px;text-decoration:none;">Skip to form</a>
+
+  <!-- Theme toggle -->
+  <div class="theme-toggle">
+    <button class="theme-btn" id="theme-btn" type="button" aria-label="Toggle color theme" aria-pressed="false">
+      <div class="theme-btn-icons" aria-hidden="true">
+        <!-- Sun icon (dark mode — click to go light) -->
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="2" x2="12" y2="0"/><line x1="12" y1="24" x2="12" y2="22"/>
+          <line x1="4.22" y1="4.22" x2="2.81" y2="2.81"/><line x1="21.19" y1="21.19" x2="19.78" y2="19.78"/>
+          <line x1="2" y1="12" x2="0" y2="12"/><line x1="24" y1="12" x2="22" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="2.81" y2="21.19"/><line x1="21.19" y1="2.81" x2="19.78" y2="4.22"/>
+        </svg>
+        <!-- Moon icon (light mode — click to go dark) -->
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </div>
+      <span id="theme-label">Light mode</span>
+    </button>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- Auth card -->
+    <main class="auth-card" id="main-form">
+
+      <!-- Brand -->
+      <div class="brand" aria-label="Relay">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+        </div>
+        <span class="brand-name">Relay</span>
+      </div>
+
+      <!-- Mode Tabs -->
+      <div class="mode-tabs" role="tablist" aria-label="Authentication mode">
+        <button
+          class="mode-tab active"
+          id="tab-signin"
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-signin"
+          data-mode="signin"
+        >Sign In</button>
+        <button
+          class="mode-tab"
+          id="tab-signup"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-signup"
+          data-mode="signup"
+        >Sign Up</button>
+        <div class="tab-slider" id="tab-slider" aria-hidden="true"></div>
+      </div>
+
+      <!-- SIGN IN PANEL -->
+      <div class="form-panels">
+        <div
+          class="form-panel"
+          id="panel-signin"
+          role="tabpanel"
+          aria-labelledby="tab-signin"
+        >
+          <h1 class="section-heading signup-heading">Welcome back</h1>
+          <p class="section-sub signup-sub">Sign in to continue your conversations.</p>
+
+          <form id="signin-form" novalidate aria-label="Sign in form" autocomplete="on">
+            <div id="signin-announce" class="form-announce" role="alert" aria-live="assertive"></div>
+
+            <div class="form-group">
+              <label class="form-label" for="signin-email">
+                Email<span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input
+                  class="form-input"
+                  id="signin-email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  placeholder="you@example.com"
+                  required
+                  aria-required="true"
+                  aria-describedby="signin-email-err"
+                />
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>
+                </svg>
+              </div>
+              <p class="field-error" id="signin-email-err" role="alert">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span></span>
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="signin-password">
+                Password<span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input
+                  class="form-input"
+                  id="signin-password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="Your password"
+                  required
+                  aria-required="true"
+                  aria-describedby="signin-password-err"
+                />
+                <button
+                  type="button"
+                  class="toggle-password"
+                  aria-label="Toggle password visibility"
+                  data-target="signin-password"
+                >
+                  <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="field-error" id="signin-password-err" role="alert">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span></span>
+              </p>
+              <div class="forgot-row">
+                <a class="forgot-link" href="#forgot" id="forgot-link">Forgot password?</a>
+              </div>
+            </div>
+
+            <button class="btn-primary" type="submit" id="signin-submit">
+              <span class="btn-text">Sign In</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+          </form>
+
+          <div class="divider" aria-hidden="true">
+            <span class="divider-text">or continue with</span>
+          </div>
+
+          <!-- OAuth Buttons -- FRONTEND PLACEHOLDERS ONLY -->
+          <nav class="oauth-grid" aria-label="Third-party sign in options">
+            <button class="oauth-btn" type="button" aria-label="Sign in with Google (frontend placeholder)">
+              <svg width="18" height="18" viewBox="0 0 18 18" class="oauth-google-icon" aria-hidden="true">
+                <path class="g-blue" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.616z"/>
+                <path class="g-green" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.909-2.259c-.806.54-1.837.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                <path class="g-yellow" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                <path class="g-red" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+              </svg>
+              Continue with Google
+              <span class="oauth-badge">placeholder</span>
+            </button>
+
+            <button class="oauth-btn" type="button" aria-label="Sign in with GitHub (frontend placeholder)">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+              </svg>
+              Continue with GitHub
+              <span class="oauth-badge">placeholder</span>
+            </button>
+
+            <button class="oauth-btn" type="button" aria-label="Sign in with Apple (frontend placeholder)">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              Continue with Apple
+              <span class="oauth-badge">placeholder</span>
+            </button>
+          </nav>
+        </div>
+
+        <!-- SIGN UP PANEL -->
+        <div
+          class="form-panel hidden"
+          id="panel-signup"
+          role="tabpanel"
+          aria-labelledby="tab-signup"
+        >
+          <h2 class="section-heading signup-heading">Create account</h2>
+          <p class="section-sub signup-sub">Join Relay and start messaging in seconds.</p>
+
+          <form id="signup-form" novalidate aria-label="Sign up form" autocomplete="on">
+            <div id="signup-announce" class="form-announce" role="alert" aria-live="assertive"></div>
+
+            <div class="name-row">
+              <div class="form-group">
+                <label class="form-label" for="signup-first">
+                  First name<span class="required-mark" aria-hidden="true">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <input
+                    class="form-input"
+                    id="signup-first"
+                    name="firstName"
+                    type="text"
+                    autocomplete="given-name"
+                    placeholder="Alex"
+                    required
+                    aria-required="true"
+                    aria-describedby="signup-first-err"
+                  />
+                </div>
+                <p class="field-error" id="signup-first-err" role="alert">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  <span></span>
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="signup-last">
+                  Last name<span class="required-mark" aria-hidden="true">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <input
+                    class="form-input"
+                    id="signup-last"
+                    name="lastName"
+                    type="text"
+                    autocomplete="family-name"
+                    placeholder="Rivera"
+                    required
+                    aria-required="true"
+                    aria-describedby="signup-last-err"
+                  />
+                </div>
+                <p class="field-error" id="signup-last-err" role="alert">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  <span></span>
+                </p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="signup-email">
+                Email<span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input
+                  class="form-input"
+                  id="signup-email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  placeholder="you@example.com"
+                  required
+                  aria-required="true"
+                  aria-describedby="signup-email-err"
+                />
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>
+                </svg>
+              </div>
+              <p class="field-error" id="signup-email-err" role="alert">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span></span>
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="signup-password">
+                Password<span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <div class="input-wrapper">
+                <input
+                  class="form-input"
+                  id="signup-password"
+                  name="password"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="Min. 8 characters"
+                  required
+                  aria-required="true"
+                  aria-describedby="signup-password-err signup-strength-label"
+                />
+                <button
+                  type="button"
+                  class="toggle-password"
+                  aria-label="Toggle password visibility"
+                  data-target="signup-password"
+                >
+                  <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="field-error" id="signup-password-err" role="alert">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span></span>
+              </p>
+              <div class="password-strength" id="password-strength" aria-live="polite">
+                <div class="strength-bar">
+                  <div class="strength-fill" id="strength-fill"></div>
+                </div>
+                <p class="strength-label" id="signup-strength-label"></p>
+              </div>
+            </div>
+
+            <div class="terms-row">
+              <input
+                class="terms-check"
+                id="terms-check"
+                name="terms"
+                type="checkbox"
+                required
+                aria-required="true"
+                aria-describedby="terms-err"
+              />
+              <label class="terms-label" for="terms-check">
+                I agree to the <a href="#terms">Terms of Service</a> and
+                <a href="#privacy">Privacy Policy</a>
+              </label>
+            </div>
+            <p class="field-error" id="terms-err" role="alert">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              <span>You must agree to continue.</span>
+            </p>
+
+            <button class="btn-primary" type="submit" id="signup-submit" style="margin-top: 12px;">
+              <span class="btn-text">Create Account</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+          </form>
+
+          <div class="divider" aria-hidden="true">
+            <span class="divider-text">or sign up with</span>
+          </div>
+
+          <nav class="oauth-grid" aria-label="Third-party sign up options">
+            <button class="oauth-btn" type="button" aria-label="Sign up with Google (frontend placeholder)">
+              <svg width="18" height="18" viewBox="0 0 18 18" class="oauth-google-icon" aria-hidden="true">
+                <path class="g-blue" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.616z"/>
+                <path class="g-green" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.909-2.259c-.806.54-1.837.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                <path class="g-yellow" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                <path class="g-red" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+              </svg>
+              Google
+              <span class="oauth-badge">placeholder</span>
+            </button>
+
+            <button class="oauth-btn" type="button" aria-label="Sign up with GitHub (frontend placeholder)">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+              </svg>
+              GitHub
+              <span class="oauth-badge">placeholder</span>
+            </button>
+
+            <button class="oauth-btn" type="button" aria-label="Sign up with Apple (frontend placeholder)">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              Apple
+              <span class="oauth-badge">placeholder</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    /* =========================================================
+       THEME MANAGEMENT
+       System preference detection + manual toggle.
+       Persists to localStorage.
+       ========================================================= */
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('theme-btn');
+    const themeLabel = document.getElementById('theme-label');
+
+    function getStoredTheme() {
+      return localStorage.getItem('relay-theme');
+    }
+
+    function getSystemTheme() {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      localStorage.setItem('relay-theme', theme);
+      const isDark = theme === 'dark';
+      themeBtn.setAttribute('aria-pressed', String(isDark));
+      themeLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
+    }
+
+    // Initial theme resolution
+    applyTheme(getStoredTheme() || getSystemTheme());
+
+    themeBtn.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    // Track system preference changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!getStoredTheme()) applyTheme(e.matches ? 'dark' : 'light');
+    });
+
+    /* =========================================================
+       CURSOR-REACTIVE ANIMATION
+       --------------------------------------------------------
+       Architecture:
+       - mousemove listener captures raw (x, y) in page space.
+       - A lerp (linear interpolation) smooths the cursor position
+         toward the target at ~8% per frame — creating an inertia
+         effect without springs or physics libraries.
+       - requestAnimationFrame drives the loop; only a single
+         translate3d CSS transform is written per frame, keeping
+         the compositor on the GPU path (no layout recalculation).
+       - A separate canvas layer renders a sparse particle field
+         of floating dots. Each dot has an independent velocity
+         and responds to cursor proximity via a repulsion vector
+         scaled by inverse-square distance.
+       - Canvas is re-sized with a ResizeObserver; particle count
+         is clamped by viewport area to cap rendering cost.
+       ========================================================= */
+    const cursorGlow = document.getElementById('cursor-glow');
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Lerp target and current positions
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let glowX = mouseX;
+    let glowY = mouseY;
+    const LERP_FACTOR = 0.075;
+
+    document.addEventListener('mousemove', e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    // Hide glow on touch devices
+    document.addEventListener('touchstart', () => {
+      cursorGlow.style.opacity = '0';
+    }, { passive: true });
+
+    /* -- Particle system -- */
+    class Particle {
+      constructor(w, h) {
+        this.reset(w, h);
+      }
+
+      reset(w, h) {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h;
+        this.baseX = this.x;
+        this.baseY = this.y;
+        this.vx = (Math.random() - 0.5) * 0.3;
+        this.vy = (Math.random() - 0.5) * 0.3;
+        this.radius = Math.random() * 1.5 + 0.5;
+        this.alpha = Math.random() * 0.5 + 0.2;
+      }
+
+      update(w, h, mx, my) {
+        // Base drift
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Repulsion from cursor
+        const dx = this.x - mx;
+        const dy = this.y - my;
+        const distSq = dx * dx + dy * dy;
+        const REPEL_RADIUS_SQ = 14400; // 120px
+        if (distSq < REPEL_RADIUS_SQ && distSq > 0) {
+          const dist = Math.sqrt(distSq);
+          const force = (120 - dist) / 120;
+          this.x += (dx / dist) * force * 2.2;
+          this.y += (dy / dist) * force * 2.2;
+        }
+
+        // Wrap edges
+        if (this.x < -4) this.x = w + 4;
+        if (this.x > w + 4) this.x = -4;
+        if (this.y < -4) this.y = h + 4;
+        if (this.y > h + 4) this.y = -4;
+      }
+    }
+
+    let particles = [];
+    let W = 0, H = 0;
+
+    function resizeCanvas() {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W;
+      canvas.height = H;
+
+      // Particle count scales with area, capped for performance
+      const targetCount = Math.min(Math.floor((W * H) / 14000), 90);
+      while (particles.length > targetCount) particles.pop();
+      while (particles.length < targetCount) particles.push(new Particle(W, H));
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas, { passive: true });
+
+    function getParticleColor() {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      return isDark ? 'rgba(79,139,255,' : 'rgba(43,109,255,';
+    }
+
+    /* -- Main animation loop -- */
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Smooth cursor glow position via lerp
+      glowX += (mouseX - glowX) * LERP_FACTOR;
+      glowY += (mouseY - glowY) * LERP_FACTOR;
+      cursorGlow.style.transform = `translate3d(${glowX - 240}px, ${glowY - 240}px, 0)`;
+
+      // Render particle field
+      ctx.clearRect(0, 0, W, H);
+      const colorBase = getParticleColor();
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.update(W, H, glowX, glowY);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = colorBase + p.alpha + ')';
+        ctx.fill();
+      }
+    }
+
+    animate();
+
+    /* =========================================================
+       MODE SWITCHING (Sign In / Sign Up)
+       ========================================================= */
+    const tabSignin = document.getElementById('tab-signin');
+    const tabSignup = document.getElementById('tab-signup');
+    const tabSlider = document.getElementById('tab-slider');
+    const panelSignin = document.getElementById('panel-signin');
+    const panelSignup = document.getElementById('panel-signup');
+
+    let currentMode = 'signin';
+
+    function switchMode(mode) {
+      if (mode === currentMode) return;
+      currentMode = mode;
+
+      const isSignup = mode === 'signup';
+
+      // Update tabs
+      tabSignin.classList.toggle('active', !isSignup);
+      tabSignup.classList.toggle('active', isSignup);
+      tabSignin.setAttribute('aria-selected', String(!isSignup));
+      tabSignup.setAttribute('aria-selected', String(isSignup));
+
+      // Slide tab indicator
+      tabSlider.classList.toggle('signup', isSignup);
+
+      // Panel transition
+      const incoming = isSignup ? panelSignup : panelSignin;
+      const outgoing = isSignup ? panelSignin : panelSignup;
+      const direction = isSignup ? 'translateX(20px)' : 'translateX(-20px)';
+
+      incoming.style.transform = direction;
+      incoming.style.opacity = '0';
+      incoming.classList.remove('hidden');
+
+      // Force reflow for transition
+      incoming.getBoundingClientRect();
+
+      incoming.style.transition = 'opacity 280ms ease, transform 280ms ease';
+      incoming.style.transform = 'translateX(0)';
+      incoming.style.opacity = '1';
+
+      outgoing.style.transition = 'opacity 200ms ease';
+      outgoing.style.opacity = '0';
+
+      setTimeout(() => {
+        outgoing.classList.add('hidden');
+        outgoing.style.transition = '';
+        outgoing.style.opacity = '';
+        incoming.style.transition = '';
+        incoming.style.transform = '';
+        incoming.style.opacity = '';
+      }, 300);
+
+      // Focus first input in incoming panel
+      const firstInput = incoming.querySelector('input');
+      if (firstInput) setTimeout(() => firstInput.focus(), 310);
+    }
+
+    tabSignin.addEventListener('click', () => switchMode('signin'));
+    tabSignup.addEventListener('click', () => switchMode('signup'));
+
+    // Keyboard support for tabs
+    [tabSignin, tabSignup].forEach(tab => {
+      tab.addEventListener('keydown', e => {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          const target = tab === tabSignin ? tabSignup : tabSignin;
+          target.focus();
+          target.click();
+        }
+      });
+    });
+
+    /* =========================================================
+       FORM VALIDATION
+       ========================================================= */
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    function showError(errEl, msg) {
+      errEl.querySelector('span').textContent = msg;
+      errEl.classList.add('visible');
+    }
+
+    function clearError(errEl) {
+      errEl.classList.remove('visible');
+    }
+
+    function setInvalid(input, errEl, msg) {
+      input.setAttribute('aria-invalid', 'true');
+      showError(errEl, msg);
+    }
+
+    function setValid(input, errEl) {
+      input.removeAttribute('aria-invalid');
+      clearError(errEl);
+    }
+
+    /* Password strength scoring */
+    function scorePassword(pw) {
+      let score = 0;
+      if (pw.length >= 8) score++;
+      if (pw.length >= 12) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      return score; // 0–5
+    }
+
+    const strengthMeta = [
+      { label: 'Too short', color: '#ef4444', width: '10%' },
+      { label: 'Weak', color: '#f97316', width: '25%' },
+      { label: 'Fair', color: '#eab308', width: '50%' },
+      { label: 'Good', color: '#22c55e', width: '75%' },
+      { label: 'Strong', color: '#4f8bff', width: '88%' },
+      { label: 'Excellent', color: '#a36bff', width: '100%' },
+    ];
+
+    const signupPasswordInput = document.getElementById('signup-password');
+    const strengthContainer = document.getElementById('password-strength');
+    const strengthFill = document.getElementById('strength-fill');
+    const strengthLabelEl = document.getElementById('signup-strength-label');
+
+    signupPasswordInput.addEventListener('input', () => {
+      const pw = signupPasswordInput.value;
+      if (!pw) {
+        strengthContainer.style.display = 'none';
+        return;
+      }
+      strengthContainer.style.display = 'block';
+      const score = Math.min(scorePassword(pw), 5);
+      const meta = strengthMeta[score];
+      strengthFill.style.width = meta.width;
+      strengthFill.style.background = meta.color;
+      strengthLabelEl.textContent = meta.label;
+      strengthLabelEl.style.color = meta.color;
+    });
+
+    /* Toggle password visibility */
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = document.getElementById(btn.dataset.target);
+        const isText = target.type === 'text';
+        target.type = isText ? 'password' : 'text';
+        btn.setAttribute('aria-label', isText ? 'Show password' : 'Hide password');
+      });
+    });
+
+    /* Simulate async submission (replace with real fetch calls) */
+    function simulateSubmit(btn) {
+      btn.setAttribute('aria-busy', 'true');
+      return new Promise(resolve => setTimeout(() => {
+        btn.removeAttribute('aria-busy');
+        resolve();
+      }, 1800));
+    }
+
+    /* Sign In Form */
+    const signinForm = document.getElementById('signin-form');
+    signinForm.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const emailEl = document.getElementById('signin-email');
+      const pwEl = document.getElementById('signin-password');
+      const emailErr = document.getElementById('signin-email-err');
+      const pwErr = document.getElementById('signin-password-err');
+      const announce = document.getElementById('signin-announce');
+
+      let valid = true;
+      announce.textContent = '';
+
+      if (!EMAIL_RE.test(emailEl.value.trim())) {
+        setInvalid(emailEl, emailErr, 'Please enter a valid email address.');
+        valid = false;
+      } else {
+        setValid(emailEl, emailErr);
+      }
+
+      if (emailEl.value.trim() === '') {
+        setInvalid(emailEl, emailErr, 'Email is required.');
+        valid = false;
+      }
+
+      if (pwEl.value.length < 1) {
+        setInvalid(pwEl, pwErr, 'Password is required.');
+        valid = false;
+      } else {
+        setValid(pwEl, pwErr);
+      }
+
+      if (!valid) {
+        announce.textContent = 'Please fix the errors above.';
+        // Focus first invalid
+        signinForm.querySelector('[aria-invalid="true"]')?.focus();
+        return;
+      }
+
+      const btn = document.getElementById('signin-submit');
+      await simulateSubmit(btn);
+      // NOTE: Replace simulateSubmit with your authentication API call.
+      // On success: redirect or update UI. On failure: surface server errors.
+    });
+
+    /* Sign Up Form */
+    const signupForm = document.getElementById('signup-form');
+    signupForm.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const firstEl   = document.getElementById('signup-first');
+      const lastEl    = document.getElementById('signup-last');
+      const emailEl   = document.getElementById('signup-email');
+      const pwEl      = document.getElementById('signup-password');
+      const termsEl   = document.getElementById('terms-check');
+      const firstErr  = document.getElementById('signup-first-err');
+      const lastErr   = document.getElementById('signup-last-err');
+      const emailErr  = document.getElementById('signup-email-err');
+      const pwErr     = document.getElementById('signup-password-err');
+      const termsErr  = document.getElementById('terms-err');
+      const announce  = document.getElementById('signup-announce');
+
+      let valid = true;
+      announce.textContent = '';
+
+      if (firstEl.value.trim().length < 1) {
+        setInvalid(firstEl, firstErr, 'First name is required.');
+        valid = false;
+      } else {
+        setValid(firstEl, firstErr);
+      }
+
+      if (lastEl.value.trim().length < 1) {
+        setInvalid(lastEl, lastErr, 'Last name is required.');
+        valid = false;
+      } else {
+        setValid(lastEl, lastErr);
+      }
+
+      if (!EMAIL_RE.test(emailEl.value.trim())) {
+        setInvalid(emailEl, emailErr, 'Please enter a valid email address.');
+        valid = false;
+      } else {
+        setValid(emailEl, emailErr);
+      }
+
+      if (pwEl.value.length < 8) {
+        setInvalid(pwEl, pwErr, 'Password must be at least 8 characters.');
+        valid = false;
+      } else if (scorePassword(pwEl.value) < 2) {
+        setInvalid(pwEl, pwErr, 'Password is too weak. Add numbers or symbols.');
+        valid = false;
+      } else {
+        setValid(pwEl, pwErr);
+      }
+
+      if (!termsEl.checked) {
+        termsErr.classList.add('visible');
+        valid = false;
+      } else {
+        termsErr.classList.remove('visible');
+      }
+
+      if (!valid) {
+        announce.textContent = 'Please fix the errors above.';
+        signupForm.querySelector('[aria-invalid="true"]')?.focus();
+        return;
+      }
+
+      const btn = document.getElementById('signup-submit');
+      await simulateSubmit(btn);
+      // NOTE: Replace simulateSubmit with your registration API call.
+    });
+
+    /* Inline validation on blur */
+    document.querySelectorAll('.form-input').forEach(input => {
+      input.addEventListener('blur', () => {
+        const form = input.closest('form');
+        const errId = input.getAttribute('aria-describedby')?.split(' ')[0];
+        if (!errId) return;
+        const errEl = document.getElementById(errId);
+        if (!errEl) return;
+
+        if (input.type === 'email' && input.value && !EMAIL_RE.test(input.value)) {
+          setInvalid(input, errEl, 'Please enter a valid email address.');
+        } else if (input.required && !input.value.trim()) {
+          // leave blank validation for submit time
+        } else if (input.value) {
+          setValid(input, errEl);
+        }
+      });
+    });
+
+    /* OAuth buttons -- frontend-only placeholder handlers */
+    document.querySelectorAll('.oauth-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // PLACEHOLDER: Replace with your OAuth SDK initialization.
+        // For Google: window.google.accounts.oauth2.initCodeClient({...}).requestCode()
+        // For GitHub: redirect to /api/auth/github (server-side OAuth flow)
+        // For Apple: AppleID.auth.signIn()
+        console.info('[OAuth Placeholder] Button clicked:', btn.getAttribute('aria-label'));
+      });
+    });
+  </script>
+</body>
+</html>
